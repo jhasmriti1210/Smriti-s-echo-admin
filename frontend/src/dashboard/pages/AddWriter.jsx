@@ -103,6 +103,9 @@ const AddWriter = () => {
                 <option value="Inspiration">Inspiration</option>
                 <option value="Reflective">Reflective</option>
                 <option value="Devotion">Devotion</option>
+                <option value="Loneliness">Loneliness</option>
+                <option value="Peace">Peace</option>
+                <option value="Freedom">Freedom</option>
               </select>
             </div>
           </div>
