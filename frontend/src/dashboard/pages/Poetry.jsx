@@ -11,10 +11,10 @@ const News = () => {
         <h2 className="text-xl font-medium">Poetry</h2>
         {store.userInfo && store.userInfo.role !== "admin" && (
           <Link
-            className="px-3 py-[6px] bg-purple-500 rounded-sm text-white hover:bg-purple-600"
+            className="px-3 py-[6px] bg-green-700 rounded-sm text-white hover:bg-green-800"
             to="/dashboard/news/create"
           >
-            Create Poetry's
+            Create Poetry
           </Link>
         )}
       </div>

@@ -50,7 +50,7 @@ const AddWriter = () => {
         <h2 className="text-xl font-medium">Add Writers</h2>
 
         <Link
-          className="px-3 py-[6px] bg-purple-500 rounded-sm text-white hover:bg-purple-600"
+          className="px-3 py-[6px] bg-green-700 rounded-sm text-white hover:bg-green-800"
           to="/dashboard/writers"
         >
           Writers
@@ -106,6 +106,7 @@ const AddWriter = () => {
                 <option value="Loneliness">Loneliness</option>
                 <option value="Peace">Peace</option>
                 <option value="Freedom">Freedom</option>
+                <option value="Recitals">Recitals</option>
               </select>
             </div>
           </div>
@@ -152,7 +153,7 @@ const AddWriter = () => {
           <div className="mt-4">
             <button
               disabled={loader}
-              className="px-3 py-[6px] bg-purple-500 rounded-sm text-white hover:bg-purple-600"
+              className="px-3 py-[6px] bg-green-700 rounded-sm text-white hover:bg-green-800"
             >
               {loader ? "Loading..." : "Add Writer"}
             </button>

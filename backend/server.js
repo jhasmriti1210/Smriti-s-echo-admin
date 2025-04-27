@@ -1,30 +1,43 @@
-const express = require('express')
-const app = express()
-const dotenv = require('dotenv')
-const body_parser = require('body-parser')
-const cors = require('cors')
-const db_connect = require('./utils/db')
+const express = require('express');
+const app = express();
+const dotenv = require('dotenv');
+const bodyParser = require('body-parser');
+const cors = require('cors');
 
-dotenv.config()
+// FIRST load environment variables
+dotenv.config();
 
+// Then require rest
+const db_connect = require('./utils/db');
+const passport = require('passport');
+require('./utils/passport'); // Assuming your passport config is inside 'utils/passport.js'
 
-app.use(body_parser.json())
+// Middlewares
+app.use(bodyParser.json());
 
-if (process.env.mode === 'production') {
-    app.use(cors())
+// CORS Handling
+if (process.env.MODE === 'production') {
+    app.use(cors());
 } else {
     app.use(cors({
         origin: ["http://localhost:5173", "http://localhost:3000"]
-    }))
+    }));
 }
 
+app.use(passport.initialize());
 
-app.use('/', require('./routes/authRoutes'))
-app.use('/', require('./routes/newsRoute'))
-app.get('/', (req, res) => res.send('Hello World!'))
+// Routes
+app.use('/', require('./routes/authRoutes'));
+app.use('/', require('./routes/newsRoute'));
+app.use('/', require('./routes/querySubscribeRoute'));
+app.use('/', require('./routes/submitpoetryRoutes'));
+app.use('/', require('./routes/userAuthRoutes'));
 
-const port = process.env.port
+app.get('/', (req, res) => res.send('Hello World!'));
 
-db_connect()
+// Connect DB
+db_connect();
 
-app.listen(port, () => console.log(`server is running on port ${port}!`))
+// Server listening
+const PORT = process.env.PORT || 8082; // default fallback
+app.listen(PORT, () => console.log(`Server is running on port ${PORT}!`));

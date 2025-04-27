@@ -10,34 +10,50 @@ import toast from "react-hot-toast";
 
 const Edit_news = () => {
   const { news_id } = useParams();
-
   const { store } = useContext(storeContext);
   const [show, setShow] = useState(false);
   const editor = useRef(null);
 
-  const [old_image, set_old_image] = useState("");
+  const [old_image, setOldImage] = useState("");
   const [title, setTitle] = useState("");
-  const [image, setImage] = useState("");
+  const [image, setImage] = useState(null);
   const [img, setImg] = useState("");
   const [description, setDescription] = useState("");
+  const [audio, setAudio] = useState("");
+  const [old_audio, setOldAudio] = useState("");
+  const [audioFile, setAudioFile] = useState(null);
+  const [loader, setLoader] = useState(false);
+  const [images, setImages] = useState([]);
+  const [imagesLoader, setImagesLoader] = useState(false);
 
+  // Handle image selection
   const imageHandle = (e) => {
     const { files } = e.target;
-
     if (files.length > 0) {
       setImg(URL.createObjectURL(files[0]));
       setImage(files[0]);
     }
   };
-  const [loader, setLoader] = useState(false);
 
+  // Handle audio selection
+  const audioHandle = (e) => {
+    const { files } = e.target;
+    if (files.length > 0) {
+      setAudio(URL.createObjectURL(files[0]));
+      setAudioFile(files[0]);
+    }
+  };
+
+  // Submit updated news
   const added = async (e) => {
     e.preventDefault();
     const formData = new FormData();
     formData.append("title", title);
     formData.append("description", description);
-    formData.append("new_image", image);
+    if (image) formData.append("new_image", image);
     formData.append("old_image", old_image);
+    if (audioFile) formData.append("new_audio", audioFile);
+    formData.append("old_audio", old_audio);
 
     try {
       setLoader(true);
@@ -51,64 +67,32 @@ const Edit_news = () => {
         }
       );
       setLoader(false);
-      console.log(data);
       toast.success(data.message);
     } catch (error) {
       setLoader(false);
-      toast.success(error.response.data.message);
+      const errorMsg = error.response?.data?.message || "An error occurred";
+      toast.error(errorMsg);
     }
   };
-  const [images, setImages] = useState([]);
 
+  // Fetch available images
   const get_images = async () => {
+    setImagesLoader(true);
     try {
       const { data } = await axios.get(`${base_url}/api/images`, {
         headers: {
           Authorization: `Bearer ${store.token}`,
         },
       });
-      console.log(data.images);
       setImages(data.images);
     } catch (error) {
       console.log(error);
+    } finally {
+      setImagesLoader(false);
     }
   };
 
-  useEffect(() => {
-    get_images();
-  }, []);
-
-  const [imagesLoader, setImagesLoader] = useState(false);
-
-  const imageHandler = async (e) => {
-    const files = e.target.files;
-    try {
-      const formData = new FormData();
-      for (let i = 0; i < files.length; i++) {
-        formData.append("images", files[i]);
-      }
-
-      setImagesLoader(true);
-
-      const { data } = await axios.post(
-        `${base_url}/api/images/add`,
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${store.token}`,
-          },
-        }
-      );
-      setImagesLoader(false);
-      setImages([...images, data.images]);
-      toast.success(data.message);
-    } catch (error) {
-      console.log(error);
-      setImagesLoader(false);
-      toast.error(error.response.data.message);
-    }
-  };
-
+  // Fetch existing news data
   const get_news = async () => {
     try {
       const { data } = await axios.get(`${base_url}/api/news/${news_id}`, {
@@ -116,28 +100,32 @@ const Edit_news = () => {
           Authorization: `Bearer ${store.token}`,
         },
       });
-      setTitle(data?.news?.title);
-      setDescription(data?.news?.description);
-      setImg(data?.news?.image);
-      set_old_image(data?.news?.image);
+      // Populate state with existing news data
+      setTitle(data?.news?.title || "");
+      setDescription(data?.news?.description || "");
+      setImg(data?.news?.image || "");
+      setOldImage(data?.news?.image || "");
+      setAudio(data?.news?.audio || "");
+      setOldAudio(data?.news?.audio || "");
     } catch (error) {
       console.log(error);
     }
   };
 
   useEffect(() => {
+    get_images();
     get_news();
   }, [news_id]);
 
   return (
     <div className="bg-white rounded-md">
       <div className="flex justify-between p-4">
-        <h2 className="text-xl font-medium">Add News</h2>
+        <h2 className="text-xl font-medium">Edit Poetry</h2>
         <Link
           className="px-3 py-[6px] bg-purple-500 rounded-sm text-white hover:bg-purple-600"
           to="/dashboard/news"
         >
-          News
+          Poetry
         </Link>
       </div>
 
@@ -155,37 +143,41 @@ const Edit_news = () => {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               type="text"
-              placeholder="title"
+              placeholder="Title"
               name="title"
               className="px-3 py-2 rounded-md outline-0 border border-gray-300 focus:border-green-500 h-10"
               id="title"
             />
           </div>
+
           <div className="mb-6">
-            <div>
-              <label
-                htmlFor="img"
-                className={`w-full h-[240px] flex rounded text-[#404040] gap-2 justify-center items-center cursor-pointer border-2 border-dashed`}
-              >
-                {img ? (
-                  <img src={img} className="w-full h-full" alt="image" />
-                ) : (
-                  <div className="flex justify-center items-center flex-col gap-y-2">
-                    <span className="text-2xl">
-                      <MdCloudUpload />
-                    </span>
-                    <span>Select Image</span>
-                  </div>
-                )}
-              </label>
-              <input
-                onChange={imageHandle}
-                className="hidden"
-                type="file"
-                id="img"
-              />
-            </div>
+            <label
+              htmlFor="img"
+              className="w-full h-[240px] flex rounded text-[#404040] gap-2 justify-center items-center cursor-pointer border-2 border-dashed"
+            >
+              {img ? (
+                <img
+                  src={img}
+                  className="w-full h-full object-cover"
+                  alt="Selected"
+                />
+              ) : (
+                <div className="flex justify-center items-center flex-col gap-y-2">
+                  <span className="text-2xl">
+                    <MdCloudUpload />
+                  </span>
+                  <span>Select Image</span>
+                </div>
+              )}
+            </label>
+            <input
+              onChange={imageHandle}
+              className="hidden"
+              type="file"
+              id="img"
+            />
           </div>
+
           <div className="flex flex-col gap-y-2 mb-6">
             <div className="flex justify-start items-center gap-x-2">
               <h2>Description</h2>
@@ -201,9 +193,28 @@ const Edit_news = () => {
                 value={description}
                 tabIndex={1}
                 onBlur={(value) => setDescription(value)}
-                onChange={() => {}}
               />
             </div>
+          </div>
+
+          <div className="mb-6">
+            <label
+              htmlFor="audio"
+              className="w-full h-[80px] flex flex-col justify-center items-center text-gray-600 border border-dashed rounded cursor-pointer"
+            >
+              {audio ? (
+                <audio controls src={audio} className="w-full px-4" />
+              ) : (
+                <span className="text-sm">Select Audio</span>
+              )}
+            </label>
+            <input
+              onChange={audioHandle}
+              className="hidden"
+              type="file"
+              id="audio"
+              accept="audio/*"
+            />
           </div>
 
           <div className="mt-4">
@@ -211,14 +222,14 @@ const Edit_news = () => {
               disabled={loader}
               className="px-3 py-[6px] bg-purple-500 rounded-sm text-white hover:bg-purple-600"
             >
-              {" "}
-              {loader ? "loading..." : "Update News"}
+              {loader ? "Loading..." : "Update Poetry"}
             </button>
           </div>
         </form>
       </div>
+
       <input
-        onChange={imageHandler}
+        onChange={imageHandle}
         type="file"
         multiple
         id="images"

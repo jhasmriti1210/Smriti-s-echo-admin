@@ -12,7 +12,7 @@ const Profile = () => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [imageFile, setImageFile] = useState(null);
-  const [loading, setLoading] = useState(false); // Track image upload status
+  const [loading, setLoading] = useState(false);
 
   // Handle image upload
   const handleImageUpload = async (e) => {
@@ -216,7 +216,7 @@ const Profile = () => {
           <div className="mt-4">
             <button
               type="submit"
-              className="px-3 py-[6px] bg-purple-500 rounded-sm text-white hover:bg-purple-600"
+              className="px-3 py-[6px] bg-green-700 rounded-sm text-white hover:bg-green-800"
             >
               Update Password
             </button>

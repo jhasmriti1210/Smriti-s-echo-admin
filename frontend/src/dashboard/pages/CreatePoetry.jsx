@@ -17,15 +17,25 @@ const CreateNews = () => {
   const [image, setImage] = useState("");
   const [img, setImg] = useState("");
   const [description, setDescription] = useState("");
+  const [audio, setAudio] = useState(null);
+  const [audioPreview, setAudioPreview] = useState("");
 
   const imageHandle = (e) => {
     const { files } = e.target;
-
     if (files.length > 0) {
       setImg(URL.createObjectURL(files[0]));
       setImage(files[0]);
     }
   };
+
+  const audioHandle = (e) => {
+    const { files } = e.target;
+    if (files.length > 0) {
+      setAudio(files[0]);
+      setAudioPreview(URL.createObjectURL(files[0]));
+    }
+  };
+
   const [loader, setLoader] = useState(false);
 
   const added = async (e) => {
@@ -34,6 +44,9 @@ const CreateNews = () => {
     formData.append("title", title);
     formData.append("description", description);
     formData.append("image", image);
+    if (audio) {
+      formData.append("audio", audio);
+    }
 
     try {
       setLoader(true);
@@ -43,13 +56,13 @@ const CreateNews = () => {
         },
       });
       setLoader(false);
-      console.log(data);
       toast.success(data.message);
     } catch (error) {
       setLoader(false);
-      toast.success(error.response.data.message);
+      toast.error(error.response?.data?.message || "Something went wrong");
     }
   };
+
   const [images, setImages] = useState([]);
 
   const get_images = async () => {
@@ -59,7 +72,6 @@ const CreateNews = () => {
           Authorization: `Bearer ${store.token}`,
         },
       });
-      console.log(data.images);
       setImages(data.images);
     } catch (error) {
       console.log(error);
@@ -92,12 +104,11 @@ const CreateNews = () => {
         }
       );
       setImagesLoader(false);
-      setImages([...images, data.images]);
+      setImages([...images, ...data.images]);
       toast.success(data.message);
     } catch (error) {
-      console.log(error);
       setImagesLoader(false);
-      toast.error(error.response.data.message);
+      toast.error(error.response?.data?.message || "Image upload failed");
     }
   };
 
@@ -106,7 +117,7 @@ const CreateNews = () => {
       <div className="flex justify-between p-4">
         <h2 className="text-xl font-medium">Add Poetry</h2>
         <Link
-          className="px-3 py-[6px] bg-purple-500 rounded-sm text-white hover:bg-purple-600"
+          className="px-3 py-[6px] bg-green-700 rounded-sm text-white hover:bg-green-800"
           to="/dashboard/news"
         >
           Poetry
@@ -115,6 +126,7 @@ const CreateNews = () => {
 
       <div className="p-4">
         <form onSubmit={added}>
+          {/* Title */}
           <div className="flex flex-col gap-y-2 mb-6">
             <label
               className="text-md font-medium text-gray-600"
@@ -133,32 +145,39 @@ const CreateNews = () => {
               id="title"
             />
           </div>
+
+          {/* Image Upload */}
           <div className="mb-6">
-            <div>
-              <label
-                htmlFor="img"
-                className={`w-full h-[240px] flex rounded text-[#404040] gap-2 justify-center items-center cursor-pointer border-2 border-dashed`}
-              >
-                {img ? (
-                  <img src={img} className="w-full h-full" alt="image" />
-                ) : (
-                  <div className="flex justify-center items-center flex-col gap-y-2">
-                    <span className="text-2xl">
-                      <MdCloudUpload />
-                    </span>
-                    <span>Select Image</span>
-                  </div>
-                )}
-              </label>
-              <input
-                required
-                onChange={imageHandle}
-                className="hidden"
-                type="file"
-                id="img"
-              />
-            </div>
+            <label
+              htmlFor="img"
+              className="w-full h-[240px] flex rounded text-[#404040] gap-2 justify-center items-center cursor-pointer border-2 border-dashed"
+            >
+              {img ? (
+                <img
+                  src={img}
+                  className="w-full h-full object-cover"
+                  alt="preview"
+                />
+              ) : (
+                <div className="flex justify-center items-center flex-col gap-y-2">
+                  <span className="text-2xl">
+                    <MdCloudUpload />
+                  </span>
+                  <span>Select Image</span>
+                </div>
+              )}
+            </label>
+            <input
+              required
+              onChange={imageHandle}
+              className="hidden"
+              type="file"
+              id="img"
+              accept="image/*"
+            />
           </div>
+
+          {/* Description */}
           <div className="flex flex-col gap-y-2 mb-6">
             <div className="flex justify-start items-center gap-x-2">
               <h2>Description</h2>
@@ -179,17 +198,45 @@ const CreateNews = () => {
             </div>
           </div>
 
+          {/* Styled Audio Upload */}
+          <div className="mb-6">
+            <label
+              htmlFor="audio"
+              className="w-full h-[150px] flex rounded text-[#404040] gap-2 justify-center items-center cursor-pointer border-2 border-dashed"
+            >
+              {audioPreview ? (
+                <audio controls src={audioPreview} className="w-full px-2">
+                  Your browser does not support the audio element.
+                </audio>
+              ) : (
+                <div className="flex justify-center items-center flex-col gap-y-2">
+                  <span className="text-2xl">
+                    <MdCloudUpload />
+                  </span>
+                  <span>Select Audio</span>
+                </div>
+              )}
+            </label>
+            <input
+              type="file"
+              id="audio"
+              onChange={audioHandle}
+              className="hidden"
+              accept="audio/*"
+            />
+          </div>
+
           <div className="mt-4">
             <button
               disabled={loader}
-              className="px-3 py-[6px] bg-purple-500 rounded-sm text-white hover:bg-purple-600"
+              className="px-3 py-[6px] bg-green-700 rounded-sm text-white hover:bg-green-800"
             >
-              {" "}
               {loader ? "loading..." : "Add Poetry"}
             </button>
           </div>
         </form>
       </div>
+
       <input
         onChange={imageHandler}
         type="file"

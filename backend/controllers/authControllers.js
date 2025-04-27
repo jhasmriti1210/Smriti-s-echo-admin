@@ -4,8 +4,6 @@ const jwt = require("jsonwebtoken")
 
 
 
-
-
 class authController {
     login = async (req, res) => {
         const { email, password } = req.body
@@ -139,7 +137,12 @@ class authController {
     }
 
 
+
 }
+
+
+
+
 
 
 module.exports = new authController()

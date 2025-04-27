@@ -11,13 +11,13 @@ import Writers from "./dashboard/pages/Writers";
 import Poetry from "./dashboard/pages/Poetry";
 import Profile from "./dashboard/pages/Profile";
 import Writer from "./dashboard/pages/WriterIndex";
-import CreatePoetry from "./dashboard/pages/CreatePoetry"; // Assuming this is missing in your code
+import CreatePoetry from "./dashboard/pages/CreatePoetry";
 import EditPoetry from "./dashboard/pages/Edit_poetry";
 import UserDashboard from "./dashboard/pages/userpage";
 
 function App() {
   const userInfo = {
-    role: "writer", // Ideally, this would come from a global state or context
+    role: "writer",
   };
 
   return (
@@ -56,7 +56,7 @@ function App() {
             <Route element={<ProtectRole role="writer" />}>
               <Route path="writer" element={<Writer />} />
               <Route path="news/create" element={<CreatePoetry />} />
-              <Route path="news/edit/:new_id" element={<EditPoetry />} />
+              <Route path="news/edit/:news_id" element={<EditPoetry />} />
             </Route>
           </Route>
         </Route>

@@ -31,7 +31,7 @@ const Writers = () => {
         <h2 className="text-xl font-medium">Writers</h2>
 
         <Link
-          className="px-3 py-[6px] bg-purple-500 rounded-sm text-white hover:bg-purple-600"
+          className="px-3 py-[6px] bg-green-700 rounded-sm text-white hover:bg-green-800"
           to="/dashboard/writer/add"
         >
           Add Writer

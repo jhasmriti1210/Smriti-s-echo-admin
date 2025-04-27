@@ -1,4 +1,4 @@
-const { model, Schema } = require('mongoose')
+const { model, Schema } = require('mongoose');
 
 const newsSchema = new Schema({
     writerId: {
@@ -22,6 +22,10 @@ const newsSchema = new Schema({
         type: String,
         required: true
     },
+    audio: {
+        type: String,
+        default: null
+    },
     category: {
         type: String,
         required: true
@@ -42,21 +46,16 @@ const newsSchema = new Schema({
         type: Number,
         default: 0
     },
-
-    // ⭐ Add Ratings
     ratings: [
         {
-
             star: { type: Number, min: 1, max: 5 }
         }
     ],
-
     averageRating: {
         type: Number,
         default: 0
     },
 
-    // 💬 Add Comments
     comments: [
         {
             userId: { type: Schema.Types.ObjectId, ref: 'authModel' },
@@ -65,7 +64,7 @@ const newsSchema = new Schema({
             date: { type: Date, default: Date.now }
         }
     ]
-}, { timestamps: true })
+}, { timestamps: true });
 
 newsSchema.index({
     title: 'text',
@@ -75,6 +74,6 @@ newsSchema.index({
     title: 5,
     description: 4,
     category: 2
-})
+});
 
-module.exports = model('poetry', newsSchema)
+module.exports = model('poetry', newsSchema);
