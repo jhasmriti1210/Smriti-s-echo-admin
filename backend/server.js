@@ -9,8 +9,8 @@ dotenv.config();
 
 // Then require rest
 const db_connect = require('./utils/db');
-const passport = require('passport');
-require('./utils/passport'); // Assuming your passport config is inside 'utils/passport.js'
+// const passport = require('passport');
+// require('./utils/passport'); // Assuming your passport config is inside 'utils/passport.js'
 
 // Middlewares
 app.use(bodyParser.json());
@@ -24,11 +24,11 @@ if (process.env.MODE === 'production') {
     }));
 }
 
-app.use(passport.initialize());
+// app.use(passport.initialize());
 
 // Routes
 app.use('/', require('./routes/authRoutes'));
-app.use('/', require('./routes/newsRoute'));
+app.use('/', require('./routes/PoetryRoute'));
 app.use('/', require('./routes/querySubscribeRoute'));
 app.use('/', require('./routes/submitpoetryRoutes'));
 app.use('/', require('./routes/userAuthRoutes'));

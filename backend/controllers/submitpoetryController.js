@@ -3,14 +3,13 @@ const Poetry = require("../models/submitPoetryModel");
 const path = require('path');
 const multer = require('multer');
 
-
 cloudinary.config({
     cloud_name: process.env.CLOUD_NAME,
     api_key: process.env.API_KEY,
     api_secret: process.env.API_SECRET
 });
 
-// Define storage for audio file upload
+// Multer config
 const audioStorage = multer.diskStorage({
     destination: (req, file, cb) => {
         cb(null, "uploads/audio/");
@@ -20,7 +19,6 @@ const audioStorage = multer.diskStorage({
     }
 });
 
-// Initialize multer to handle audio file uploads
 const audioUpload = multer({
     storage: audioStorage,
     fileFilter: (req, file, cb) => {
@@ -35,36 +33,31 @@ const audioUpload = multer({
     }
 }).single("audio");
 
-// Submit Poetry Function (Including optional audio handling)
+// 🔸 Submit Poetry
 const submitPoetry = (req, res) => {
-    // Handle audio file upload
     audioUpload(req, res, async (err) => {
         if (err) {
             return res.status(400).json({ message: err.message });
         }
 
+        let audioFile = null;
 
         if (req.file) {
             try {
-                // Upload audio file to Cloudinary
                 const cloudinaryResult = await cloudinary.uploader.upload(req.file.path, {
                     resource_type: "auto",
                     folder: "userpoetry_audio",
                 });
 
-                const audioUrl = cloudinaryResult.secure_url;
-                req.file.path = audioUrl;
+                audioFile = cloudinaryResult.secure_url;
             } catch (uploadError) {
                 return res.status(500).json({ message: "Error uploading audio to Cloudinary.", error: uploadError.message });
             }
         }
 
-        // Get poetry data from the request body
         const { fullName, email, category, title, poetryText } = req.body;
-        const audioFile = req.file ? req.file.path : null;
 
         try {
-            // Save poetry details in the database
             const newPoetry = new Poetry({
                 fullName,
                 email,
@@ -84,4 +77,41 @@ const submitPoetry = (req, res) => {
     });
 };
 
-module.exports = { submitPoetry };
+const getAllUserPoetry = async (req, res) => {
+    try {
+        const poetryList = await Poetry.find().sort({ createdAt: -1 });
+        res.status(200).json(poetryList);
+    } catch (error) {
+        console.error("Error fetching poetry:", error);
+        res.status(500).json({ message: 'Error fetching poetry', error });
+    }
+
+
+};
+
+
+// 🔸 Get Single Poetry by ID
+const getSinglePoetry = async (req, res) => {
+    const { id } = req.params;
+
+    // Validate MongoDB ObjectId
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(400).json({ message: "Invalid poetry ID format." });
+    }
+
+    try {
+        const poetry = await Poetry.findById(id);
+
+        if (!poetry) {
+            return res.status(404).json({ message: "Poetry not found." });
+        }
+
+        res.status(200).json(poetry);
+    } catch (error) {
+        console.error("Error fetching poetry by ID:", error);
+        res.status(500).json({ message: "Server error while fetching poetry." });
+    }
+};
+
+// ✅ Export properly
+module.exports = { submitPoetry, getAllUserPoetry, getSinglePoetry };

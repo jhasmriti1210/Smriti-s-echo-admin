@@ -38,7 +38,7 @@ const Profile = () => {
           {
             headers: {
               "Content-Type": "multipart/form-data",
-              Authorization: `Bearer ${localStorage.getItem("newsToken")}`,
+              Authorization: `Bearer ${localStorage.getItem("poetryToken")}`,
             },
           }
         );
@@ -79,7 +79,7 @@ const Profile = () => {
 
     try {
       // Get token from localStorage
-      const token = localStorage.getItem("newsToken");
+      const token = localStorage.getItem("poetryToken");
 
       // Check if token exists
       if (!token) {

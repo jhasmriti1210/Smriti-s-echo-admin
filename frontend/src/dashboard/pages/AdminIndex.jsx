@@ -7,7 +7,7 @@ const AdminIndex = () => {
   const { store, dispatch } = useContext(storeContext);
 
   const logout = () => {
-    localStorage.removeItem("newsToken");
+    localStorage.removeItem("poetryToken");
     dispatch({ type: "logout", payload: "" });
     navigate("/login");
   };

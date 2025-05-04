@@ -27,7 +27,7 @@ const Login = () => {
       setLoader(true);
       const { data } = await axios.post(`${base_url}/api/login`, state);
       setLoader(false);
-      localStorage.setItem("newsToken", data.token);
+      localStorage.setItem("poetryToken", data.token);
       toast.success(data.message);
       dispatch({
         type: "login_success",

@@ -12,6 +12,8 @@ import Poetry from "./dashboard/pages/Poetry";
 import Profile from "./dashboard/pages/Profile";
 import Writer from "./dashboard/pages/WriterIndex";
 import CreatePoetry from "./dashboard/pages/CreatePoetry";
+import CreatePoetryAdmin from "./dashboard/pages/CreatePoetryAdmin";
+import UserSubmittedPoetry from "./dashboard/pages/UserSubmittedPoetry";
 import EditPoetry from "./dashboard/pages/Edit_poetry";
 import UserDashboard from "./dashboard/pages/userpage";
 
@@ -42,7 +44,7 @@ function App() {
 
             {/* Unable access page */}
             <Route path="unable-access" element={<Unable />} />
-            <Route path="news" element={<Poetry />} />
+            <Route path="poetry" element={<Poetry />} />
             <Route path="profile" element={<Profile />} />
 
             {/* Admin routes with role protection */}
@@ -50,13 +52,22 @@ function App() {
               <Route path="admin" element={<AdminIndex />} />
               <Route path="writer/add" element={<AddWriter />} />
               <Route path="writers" element={<Writers />} />
+              <Route
+                path="poetry/createadmin"
+                element={<CreatePoetryAdmin />}
+              />
+              <Route path="poetry/edit/:poetry_id" element={<EditPoetry />} />
+              <Route
+                path="poetry/usersubmittedpoetry"
+                element={<UserSubmittedPoetry />}
+              />
             </Route>
 
             {/* Writer routes with role protection */}
             <Route element={<ProtectRole role="writer" />}>
               <Route path="writer" element={<Writer />} />
-              <Route path="news/create" element={<CreatePoetry />} />
-              <Route path="news/edit/:news_id" element={<EditPoetry />} />
+              <Route path="poetry/create" element={<CreatePoetry />} />
+              <Route path="poetry/edit/:poetry_id" element={<EditPoetry />} />
             </Route>
           </Route>
         </Route>

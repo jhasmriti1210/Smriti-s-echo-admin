@@ -3,8 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { AiFillDashboard, AiOutlinePlus } from "react-icons/ai";
 import { ImProfile } from "react-icons/im";
 import { FiUsers } from "react-icons/fi";
-import { BiNews } from "react-icons/bi";
-import { FaPlus } from "react-icons/fa";
+import { FaPlus, FaBook, FaPen, FaListAlt, FaUser } from "react-icons/fa";
 import { IoMdLogOut } from "react-icons/io";
 import storeContext from "../../context/storeContext";
 
@@ -15,7 +14,7 @@ const Sidebar = () => {
   const { store, dispatch } = useContext(storeContext);
 
   const logout = () => {
-    localStorage.removeItem("newsToken");
+    localStorage.removeItem("poetryToken");
     dispatch({ type: "logout", payload: "" });
     navigate("/login");
   };
@@ -81,6 +80,36 @@ const Sidebar = () => {
                 <span>Writers</span>
               </Link>
             </li>
+            <li>
+              <Link
+                to="/dashboard/poetry/usersubmittedpoetry"
+                className={`px-3 ${
+                  pathname === "/dashboard/poetry/usersubmittedpoetry"
+                    ? "bg-green-700 text-white"
+                    : "bg-white text-[#404040f6]"
+                } py-2 hover:shadow-lg hover:shadow-indigo-5000/20 w-full rounded-sm flex gap-x-2 justify-start items-center hover:bg-green-700 hover:text-white`}
+              >
+                <span className="text-xl">
+                  <FaBook />
+                </span>
+                <span>User's poetry</span>
+              </Link>
+            </li>
+            <li>
+              <Link
+                to="/dashboard/poetry/createadmin"
+                className={`px-3 ${
+                  pathname === "/dashboard/poetry/createadmin"
+                    ? "bg-green-700 text-white"
+                    : "bg-white text-[#404040f6]"
+                } py-2 hover:shadow-lg hover:shadow-indigo-5000/20 w-full rounded-sm flex gap-x-2 justify-start items-center hover:bg-green-700 hover:text-white`}
+              >
+                <span className="text-xl">
+                  <FaPen />
+                </span>
+                <span>Add User's Poetry</span>
+              </Link>
+            </li>
           </>
         ) : (
           <>
@@ -101,9 +130,9 @@ const Sidebar = () => {
             </li>
             <li>
               <Link
-                to="/dashboard/news/create"
+                to="/dashboard/poetry/create"
                 className={`px-3 ${
-                  pathname === "/dashboard/news/create"
+                  pathname === "/dashboard/poetry/create"
                     ? "bg-green-700 text-white"
                     : "bg-white text-[#404040f6]"
                 } py-2 hover:shadow-lg hover:shadow-indigo-5000/20 w-full rounded-sm flex gap-x-2 justify-start items-center hover:bg-green-700 hover:text-white`}
@@ -120,15 +149,15 @@ const Sidebar = () => {
         {/* Common tabs for both admin and writer */}
         <li>
           <Link
-            to="/dashboard/news"
+            to="/dashboard/poetry"
             className={`px-3 ${
-              pathname === "/dashboard/news"
+              pathname === "/dashboard/poetry"
                 ? "bg-green-700 text-white"
                 : "bg-white text-[#404040f6]"
             } py-2 hover:shadow-lg hover:shadow-indigo-5000/20 w-full rounded-sm flex gap-x-2 justify-start items-center hover:bg-green-700 hover:text-white`}
           >
             <span className="text-xl">
-              <BiNews />
+              <FaListAlt />
             </span>
             <span>All Poetry</span>
           </Link>
@@ -144,7 +173,7 @@ const Sidebar = () => {
             } py-2 hover:shadow-lg hover:shadow-indigo-5000/20 w-full rounded-sm flex gap-x-2 justify-start items-center hover:bg-green-700 hover:text-white`}
           >
             <span className="text-xl">
-              <ImProfile />
+              <FaUser />
             </span>
             <span>Profile</span>
           </Link>

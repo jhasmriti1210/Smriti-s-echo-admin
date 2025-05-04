@@ -17,8 +17,20 @@ const userSchema = new mongoose.Schema({
     },
     password: {
         type: String,
-        required: true,
-        minlength: 5, // Minimum password length
+        minlength: 5,
+        default: null,
+    },
+    googleId: {
+        type: String,
+        default: null,
+    },
+    profilePicture: {
+        type: String,
+        default: "https://cdn-icons-png.flaticon.com/512/149/149071.png", // Default avatar URL
+    },
+    isVerified: {
+        type: Boolean,
+        default: false, // Initially false, indicating the email is not verified
     },
     createdAt: {
         type: Date,
@@ -32,7 +44,10 @@ const userSchema = new mongoose.Schema({
 
 // Method to compare passwords
 userSchema.methods.comparePassword = async function (candidatePassword) {
-    return bcrypt.compare(candidatePassword, this.password);
+    if (this.password) {
+        return bcrypt.compare(candidatePassword, this.password);
+    }
+    return false; // No password for Google login
 };
 
 const User = mongoose.model("User", userSchema);

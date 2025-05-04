@@ -8,8 +8,8 @@ import axios from "axios";
 import storeContext from "../../context/storeContext";
 import toast from "react-hot-toast";
 
-const Edit_news = () => {
-  const { news_id } = useParams();
+const Edit_poetry = () => {
+  const { poetry_id } = useParams();
   const { store } = useContext(storeContext);
   const [show, setShow] = useState(false);
   const editor = useRef(null);
@@ -44,7 +44,7 @@ const Edit_news = () => {
     }
   };
 
-  // Submit updated news
+  // Submit updated poetry
   const added = async (e) => {
     e.preventDefault();
     const formData = new FormData();
@@ -58,7 +58,7 @@ const Edit_news = () => {
     try {
       setLoader(true);
       const { data } = await axios.put(
-        `${base_url}/api/news/update/${news_id}`,
+        `${base_url}/api/poetry/update/${poetry_id}`,
         formData,
         {
           headers: {
@@ -92,21 +92,21 @@ const Edit_news = () => {
     }
   };
 
-  // Fetch existing news data
-  const get_news = async () => {
+  // Fetch existing poetry data
+  const get_poetry = async () => {
     try {
-      const { data } = await axios.get(`${base_url}/api/news/${news_id}`, {
+      const { data } = await axios.get(`${base_url}/api/poetry/${poetry_id}`, {
         headers: {
           Authorization: `Bearer ${store.token}`,
         },
       });
-      // Populate state with existing news data
-      setTitle(data?.news?.title || "");
-      setDescription(data?.news?.description || "");
-      setImg(data?.news?.image || "");
-      setOldImage(data?.news?.image || "");
-      setAudio(data?.news?.audio || "");
-      setOldAudio(data?.news?.audio || "");
+      // Populate state with existing poetry data
+      setTitle(data?.poetry?.title || "");
+      setDescription(data?.poetry?.description || "");
+      setImg(data?.poetry?.image || "");
+      setOldImage(data?.poetry?.image || "");
+      setAudio(data?.poetry?.audio || "");
+      setOldAudio(data?.poetry?.audio || "");
     } catch (error) {
       console.log(error);
     }
@@ -114,8 +114,8 @@ const Edit_news = () => {
 
   useEffect(() => {
     get_images();
-    get_news();
-  }, [news_id]);
+    get_poetry();
+  }, [poetry_id]);
 
   return (
     <div className="bg-white rounded-md">
@@ -123,7 +123,7 @@ const Edit_news = () => {
         <h2 className="text-xl font-medium">Edit Poetry</h2>
         <Link
           className="px-3 py-[6px] bg-purple-500 rounded-sm text-white hover:bg-purple-600"
-          to="/dashboard/news"
+          to="/dashboard/poetry"
         >
           Poetry
         </Link>
@@ -240,4 +240,4 @@ const Edit_news = () => {
   );
 };
 
-export default Edit_news;
+export default Edit_poetry;

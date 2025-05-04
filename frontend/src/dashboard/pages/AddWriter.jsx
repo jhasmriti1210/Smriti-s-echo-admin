@@ -27,7 +27,7 @@ const AddWriter = () => {
     try {
       setLoader(true);
       const { data } = await axios.post(
-        `${base_url}/api/news/writer/add`,
+        `${base_url}/api/poetry/writer/add`,
         state,
         {
           headers: {

@@ -8,7 +8,7 @@ import axios from "axios";
 import storeContext from "../../context/storeContext";
 import toast from "react-hot-toast";
 
-const CreateNews = () => {
+const CreatePoetry = () => {
   const { store } = useContext(storeContext);
   const [show, setShow] = useState(false);
   const editor = useRef(null);
@@ -50,11 +50,15 @@ const CreateNews = () => {
 
     try {
       setLoader(true);
-      const { data } = await axios.post(`${base_url}/api/news/add`, formData, {
-        headers: {
-          Authorization: `Bearer ${store.token}`,
-        },
-      });
+      const { data } = await axios.post(
+        `${base_url}/api/poetry/add`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${store.token}`,
+          },
+        }
+      );
       setLoader(false);
       toast.success(data.message);
     } catch (error) {
@@ -118,7 +122,7 @@ const CreateNews = () => {
         <h2 className="text-xl font-medium">Add Poetry</h2>
         <Link
           className="px-3 py-[6px] bg-green-700 rounded-sm text-white hover:bg-green-800"
-          to="/dashboard/news"
+          to="/dashboard/poetry"
         >
           Poetry
         </Link>
@@ -249,4 +253,4 @@ const CreateNews = () => {
   );
 };
 
-export default CreateNews;
+export default CreatePoetry;

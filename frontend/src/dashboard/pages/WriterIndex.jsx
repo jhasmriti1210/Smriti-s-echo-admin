@@ -26,14 +26,14 @@ const WriterIndex = () => {
         {/* Quick Actions */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-10">
           <Link
-            to="/dashboard/news/create"
+            to="/dashboard/poetry/create"
             className="flex flex-col items-center justify-center bg-blue-500 text-white p-4 rounded-lg shadow-md hover:bg-blue-600 transition duration-300 h-36"
           >
             <span className="text-2xl">✏️</span>
             <span className="mt-2 text-sm md:text-base">Add New Poetry</span>
           </Link>
           <Link
-            to="/dashboard/news"
+            to="/dashboard/poetry"
             className="flex flex-col items-center justify-center bg-green-500 text-white p-4 rounded-lg shadow-md hover:bg-green-600 transition duration-300"
           >
             <span className="text-2xl">📁</span>
