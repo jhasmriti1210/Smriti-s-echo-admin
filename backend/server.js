@@ -1,4 +1,4 @@
-const express = require('express');
+import express from 'express';
 const app = express();
 const dotenv = require('dotenv');
 const bodyParser = require('body-parser');
@@ -9,7 +9,7 @@ import mongoose from 'mongoose';
 dotenv.config();
 
 // Then require rest
-const db_connect = require('./utils/db');
+// const db_connect = require('./utils/db');
 
 
 // Middlewares
