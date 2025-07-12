@@ -83,6 +83,8 @@ class authController {
                             height: 300,
                             crop: "fill",
                             quality: "auto:good",
+                            secure: true,
+
                         });
 
                         profilePictureUrl = cloudinaryResult.secure_url; // Get the URL from Cloudinary response
@@ -302,6 +304,7 @@ class authController {
                     try {
                         const uploadResult = await cloudinary.uploader.upload(localPath, {
                             folder: "user_profiles",
+                            secure: true,
                             width: 300,
                             height: 300,
                             crop: "fill",
