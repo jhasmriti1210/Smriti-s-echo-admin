@@ -1,15 +1,15 @@
-import express from 'express';
+const express = require('express');
 const app = express();
 const dotenv = require('dotenv');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-import mongoose from 'mongoose';
+const mongoose = require('mongoose');
 
 // FIRST load environment variables
 dotenv.config();
 
 // Then require rest
-// const db_connect = require('./utils/db');
+const db_connect = require('./utils/db');
 
 
 // Middlewares
