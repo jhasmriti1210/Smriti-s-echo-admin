@@ -2,7 +2,11 @@ const mongoose = require('mongoose')
 const db_connect = async () => {
     try {
         if (process.env.mode === "production") {
-            await mongoose.connect(process.env.db_production_url)
+            await mongoose.connect(process.env.db_production_url, {
+                useNewUrlParser: true,
+                useUnifiedTopology: true,
+                useCreateIndex: true
+            })
             console.log("production database connect")
         } else {
             console.log("ok")
