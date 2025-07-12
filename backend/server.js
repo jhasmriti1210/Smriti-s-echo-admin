@@ -3,6 +3,7 @@ const app = express();
 const dotenv = require('dotenv');
 const bodyParser = require('body-parser');
 const cors = require('cors');
+import mongoose from 'mongoose';
 
 // FIRST load environment variables
 dotenv.config();
