@@ -19,7 +19,7 @@ if (process.env.MODE === 'production') {
     app.use(cors());
 } else {
     app.use(cors({
-        origin: ["http://localhost:5173", "http://localhost:3000"]
+        origin: ["https://smriti-s-echo-admin-pq1n.vercel.app/", "http://localhost:3000"]
     }));
 }
 
