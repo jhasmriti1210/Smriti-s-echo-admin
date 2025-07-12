@@ -42,8 +42,6 @@ const poetrySchema = new Schema({
         type: Date,
         default: null
     },
-
-
     status: {
         type: String,
         default: 'pending'
@@ -61,7 +59,6 @@ const poetrySchema = new Schema({
         type: Number,
         default: 0
     },
-
     comments: [
         {
             userId: { type: Schema.Types.ObjectId, ref: 'authModel' },
@@ -69,7 +66,11 @@ const poetrySchema = new Schema({
             text: String,
             date: { type: Date, default: Date.now }
         }
-    ]
+    ],
+    isFeatured: {
+        type: Boolean,
+        default: false
+    }
 }, { timestamps: true });
 
 poetrySchema.index({

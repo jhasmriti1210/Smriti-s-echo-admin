@@ -435,6 +435,41 @@ class poetryController {
             return res.status(500).json({ message: 'Internal server error' })
         }
     }
+
+    get_featured_poetry = async (req, res) => {
+        try {
+            const featured_poetry = await poetryModel.aggregate([
+                {
+                    $match: {
+                        status: 'active', // Ensure the poetry is active
+                        isFeatured: true  // Select only the featured poems
+                    }
+                },
+                {
+                    $sort: { createdAt: -1 } // Optional: Sort by most recent
+                },
+                {
+                    $project: {
+                        _id: 1,
+                        title: 1,
+                        slug: 1,
+                        writerName: 1,
+                        image: 1,
+                        description: 1,
+                        date: 1,
+                        category: 1,
+                        isFeatured: 1
+                    }
+                }
+            ]);
+
+            return res.status(200).json({ featuredPoetry: featured_poetry });
+        } catch (error) {
+            console.log(error.message);
+            return res.status(500).json({ message: 'Internal server error' });
+        }
+    };
+
     get_images = async (req, res) => {
         console.log('okkasd')
         try {
@@ -546,6 +581,37 @@ class poetryController {
         }
     };
 
+    top_testimonials = async (req, res) => {
+        try {
+            // Fetch poetry items with at least one comment and a rating
+            const topPoetries = await poetryModel.find({
+                averageRating: { $gt: 0 },
+                comments: { $exists: true, $not: { $size: 0 } }
+            })
+                .sort({ averageRating: -1 }) // Sort by highest rating
+                .limit(5); // Limit to top 5
+
+            // Format response
+            const testimonials = topPoetries.map(poem => {
+                const latestComment = poem.comments[poem.comments.length - 1];
+                return {
+                    _id: poem._id,
+                    title: poem.title,
+                    averageRating: poem.averageRating,
+                    comment: latestComment ? {
+                        name: latestComment.name,
+                        text: latestComment.text,
+                        createdAt: latestComment.createdAt
+                    } : null
+                };
+            });
+
+            return res.status(200).json({ testimonials });
+        } catch (error) {
+            console.error("Error fetching top testimonials:", error);
+            return res.status(500).json({ message: 'Internal server error' });
+        }
+    };
 
 
     delete_poetry = async (req, res) => {

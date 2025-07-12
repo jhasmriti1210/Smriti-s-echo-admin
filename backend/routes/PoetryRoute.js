@@ -21,6 +21,8 @@ router.get('/api/popular/poetry', poetryController.get_popular_poetry);
 router.get('/api/latest/poetry', poetryController.get_latest_poetry);
 router.get('/api/images/poetry', poetryController.get_images);
 router.get('/api/recent/poetry', poetryController.get_recent_poetry);
+router.get("/api/featured/poetry", poetryController.get_featured_poetry);
+
 
 router.get('/api/poetry/details/:slug', poetryController.get_poetry);
 router.get('/api/category/all', poetryController.get_categories);
@@ -30,7 +32,7 @@ router.get('/api/search/poetry', poetryController.poetry_search);
 
 router.post('/api/add-rating/:poetry_id', usermiddleware.auth, poetryController.add_rating);
 router.post('/api/add-comment/:poetry_id', usermiddleware.auth, poetryController.add_comment);
-
+router.get("/api/top-testimonials", poetryController.top_testimonials);
 
 
 

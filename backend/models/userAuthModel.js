@@ -20,10 +20,7 @@ const userSchema = new mongoose.Schema({
         minlength: 5,
         default: null,
     },
-    googleId: {
-        type: String,
-        default: null,
-    },
+
     profilePicture: {
         type: String,
         default: "https://cdn-icons-png.flaticon.com/512/149/149071.png", // Default avatar URL
@@ -32,6 +29,10 @@ const userSchema = new mongoose.Schema({
         type: Boolean,
         default: false, // Initially false, indicating the email is not verified
     },
+    favorites: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'poetry'
+    }],
     createdAt: {
         type: Date,
         default: Date.now,

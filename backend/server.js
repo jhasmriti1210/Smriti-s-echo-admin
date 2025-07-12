@@ -9,8 +9,7 @@ dotenv.config();
 
 // Then require rest
 const db_connect = require('./utils/db');
-// const passport = require('passport');
-// require('./utils/passport'); // Assuming your passport config is inside 'utils/passport.js'
+
 
 // Middlewares
 app.use(bodyParser.json());

@@ -6,6 +6,11 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const nodemailer = require("nodemailer");
+require('dotenv').config();
+const poetryModel = require('../models/poetryModel');
+
+
+
 
 // Multer setup for local file storage
 const storage = multer.diskStorage({
@@ -98,7 +103,7 @@ class authController {
                     email,
                     password: hashedPassword,
                     profilePicture: profilePictureUrl,
-                    isVerified: false, // Flag for email verification
+                    isVerified: false,
                 });
 
                 await newUser.save();
@@ -108,12 +113,13 @@ class authController {
                     expiresIn: '1d', // Token expiration time
                 });
 
-                const verificationLink = `http://localhost:3000/verify-email?token=${verificationToken}`;
+                const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+                const verificationLink = `${frontendUrl}/loginstuff/verify-email?token=${verificationToken}`;
 
                 // Sending confirmation email
                 const mailOptions = {
-                    from: process.env.MY_EMAIL, // sender address
-                    to: email, // receiver address
+                    from: process.env.MY_EMAIL,
+                    to: email,
                     subject: "Welcome to Smriti's Echoes – Unleash Your Creativity!",
                     text: `Hi ${fullName},\n\nWelcome aboard, and thank you for joining Smriti's Echoes! To complete your registration, please verify your email address by clicking the link below:\n\n${verificationLink}`,
                     html: `<p>Hi <strong>${fullName}</strong>,</p><p>Welcome aboard, and thank you for joining Smriti's Echoes!</p><p>To complete your registration, please verify your email address by clicking the link below:</p><p><a href="${verificationLink}">Verify Email</a></p>`
@@ -171,7 +177,7 @@ class authController {
         }
     };
 
-
+    //login function
     user_login = async (req, res) => {
         const { email, password } = req.body;
 
@@ -181,7 +187,6 @@ class authController {
                 return res.status(401).json({ message: "Invalid credentials" });
             }
 
-            // ✅ Check if the user is verified once during account creation
             if (!user.isVerified) {
                 return res.status(403).json({
                     success: false,
@@ -194,7 +199,6 @@ class authController {
                 return res.status(400).json({ success: false, message: "Invalid credentials" });
             }
 
-            // JWT Token generation if credentials are valid and email is verified
             const token = jwt.sign({ userId: user._id }, process.env.secret, {
                 expiresIn: process.env.exp_time,
             });
@@ -205,8 +209,10 @@ class authController {
                 token,
                 data: {
                     user: {
+                        _id: user._id,
                         fullName: user.fullName,
                         email: user.email,
+                        profilePicture: user.profilePicture,
                     }
                 }
             });
@@ -216,6 +222,7 @@ class authController {
             return res.status(500).json({ message: "Internal server error" });
         }
     };
+
 
 
     // ✅ Check User Controller
@@ -240,101 +247,205 @@ class authController {
         }
     };
 
-    // ✅ Update Profile Controller
-    update_profile = async (req, res) => {
+
+    get_user_profile = async (req, res) => {
         try {
-            // Use Multer for file handling
-            upload.single('profilePicture')(req, res, async (err) => {
-                if (err) {
-                    console.error('Multer Error:', err);
-                    return res.status(400).json({ success: false, message: 'Error uploading profile picture' });
-                }
+            const userId = req.userId;
+            console.log("🔍 Extracted userId from token:", userId);
 
+            const user = await authModel.findOne({ _id: userId }).select("-password");
+            console.log("🔍 User Found:", user);
+
+            if (!user) {
+                return res.status(404).json({ success: false, message: "User not found" });
+            }
+
+            res.status(200).json({ success: true, data: user });
+        } catch (error) {
+            console.error("❌ Get Profile Error:", error);
+            return res.status(500).json({ success: false, message: "Server error" });
+        }
+    };
+
+
+    // Update User Profile
+    update_user_profile = async (req, res) => {
+        upload.single('profilePicture')(req, res, async (err) => {
+            if (err) {
+                console.error('Multer Error:', err);
+                return res.status(400).json({ success: false, message: 'Error uploading profile picture' });
+            }
+
+            try {
+                const userId = req.userId; // ✅ FIXED: Correct way to access userId from middleware
                 const { fullName, email, password } = req.body;
-                const profilePictureFile = req.file;
 
-                // Check if the user is authenticated (assuming userId is passed via JWT token)
-                const userId = req.user.userId; // This should be set in your authentication middleware
-
-                if (!userId) {
-                    return res.status(401).json({ success: false, message: 'User not authenticated' });
-                }
-
-                if (!fullName && !email && !password && !profilePictureFile) {
-                    return res.status(400).json({ success: false, message: 'No information to update' });
-                }
-
-                // Fetch the user from the database
                 const user = await authModel.findById(userId);
                 if (!user) {
-                    return res.status(404).json({ success: false, message: 'User not found' });
+                    return res.status(404).json({ success: false, message: "User not found" });
                 }
 
-                // If email is updated, check if the new email is already taken
-                if (email && email !== user.email) {
-                    const existingUser = await authModel.findOne({ email });
-                    if (existingUser) {
-                        return res.status(400).json({ success: false, message: 'Email is already in use' });
+                // Update fields if provided
+                if (fullName) user.fullName = fullName;
+                if (email) {
+                    const existingUserWithEmail = await authModel.findOne({ email });
+                    if (existingUserWithEmail && existingUserWithEmail._id.toString() !== user._id.toString()) {
+                        return res.status(400).json({ success: false, message: "Email already in use" });
                     }
+                    user.email = email;
                 }
+                if (password) user.password = await bcrypt.hash(password, 10);
 
-                // Update profile picture if new one is uploaded
-                let profilePictureUrl = user.profilePicture; // Default to current profile picture
-                if (profilePictureFile) {
-                    const localPath = `./uploads/${profilePictureFile.filename}`;
-
+                // Upload new profile picture
+                if (req.file) {
+                    const localPath = `./uploads/${req.file.filename}`;
                     try {
-                        const cloudinaryResult = await cloudinary.uploader.upload(localPath, {
+                        const uploadResult = await cloudinary.uploader.upload(localPath, {
                             folder: "user_profiles",
-                            public_id: `${Date.now()}_${fullName.replace(/\s+/g, '_')}`,
-                            resource_type: "image",
                             width: 300,
                             height: 300,
                             crop: "fill",
-                            quality: "auto:good",
+                            quality: "auto:good"
                         });
 
-                        profilePictureUrl = cloudinaryResult.secure_url; // Update the URL
-                        fs.unlinkSync(localPath); // Remove local file after uploading
+                        user.profilePicture = uploadResult.secure_url;
+                        fs.unlinkSync(localPath);
                     } catch (uploadError) {
-                        console.error('Cloudinary Upload Error:', uploadError);
+                        console.error("Cloudinary Upload Error:", uploadError);
                         return res.status(500).json({ success: false, message: "Failed to upload profile picture" });
                     }
                 }
 
-                // If password is updated, hash the new password
-                let hashedPassword = user.password;
-                if (password) {
-                    hashedPassword = await bcrypt.hash(password, 10);
-                }
-
-                // Update the user with new data
-                const updatedUser = await authModel.findByIdAndUpdate(
-                    userId,
-                    {
-                        fullName: fullName || user.fullName,
-                        email: email || user.email,
-                        password: hashedPassword,
-                        profilePicture: profilePictureUrl,
-                    },
-                    { new: true }
-                );
+                await user.save();
 
                 res.status(200).json({
                     success: true,
-                    message: 'Profile updated successfully',
-                    user: {
-                        fullName: updatedUser.fullName,
-                        email: updatedUser.email,
-                        profilePicture: updatedUser.profilePicture,
+                    message: "Profile updated successfully",
+                    data: {
+                        fullName: user.fullName,
+                        email: user.email,
+                        profilePicture: user.profilePicture,
                     }
                 });
+
+            } catch (error) {
+                console.error("Update Profile Error:", error);
+                return res.status(500).json({ success: false, message: "Server error" });
+            }
+        });
+    };
+
+    toggle_favorite_poem = async (req, res) => {
+        const { poetry_id } = req.params;
+        const userId = req.userId;
+
+        const mongoose = require("mongoose");
+        if (!mongoose.Types.ObjectId.isValid(poetry_id) || !mongoose.Types.ObjectId.isValid(userId)) {
+            return res.status(400).json({ message: "Invalid poetry ID or user ID" });
+        }
+
+        try {
+            const poem = await poetryModel.findById(poetry_id);
+            if (!poem) {
+                return res.status(404).json({ message: "Poetry not found" });
+            }
+
+            const user = await authModel.findById(userId);
+            if (!user) {
+                return res.status(404).json({ message: "User not found" });
+            }
+
+            const isFavorite = user.favorites.includes(poetry_id);
+            const updateAction = isFavorite
+                ? { $pull: { favorites: poetry_id } }
+                : { $addToSet: { favorites: poetry_id } };
+
+            // ✅ Populate favorites after update
+            const updatedUser = await authModel.findByIdAndUpdate(userId, updateAction, { new: true })
+                .populate('favorites');
+
+            return res.status(200).json({
+                message: isFavorite
+                    ? "Removed from favorites"
+                    : "Added to favorites",
+                favorites: updatedUser.favorites, // ✅ Now returns poem objects, not just IDs
             });
+
         } catch (error) {
-            console.error('Update Profile Error:', error);
-            return res.status(500).json({ success: false, message: 'Error updating profile' });
+            console.error("Error toggling favourite poem:", error);
+            return res.status(500).json({ message: "Internal server error", error: error.message });
         }
     };
+
+
+    //get user favourite poem
+
+    get_user_favorites = async (req, res) => {
+        const userId = req.userId;
+
+        if (!userId || userId.length !== 24) {
+            return res.status(400).json({ message: "Invalid user ID" });
+        }
+
+        try {
+            const user = await authModel.findById(userId)
+                .populate('favorites'); // will populate full poetry objects
+
+            if (!user) {
+                return res.status(404).json({ message: "User not found" });
+            }
+
+            return res.status(200).json({
+                favorites: user.favorites
+            });
+
+        } catch (error) {
+            console.error("Error fetching favourites:", error);
+            return res.status(500).json({ message: "Internal server error", error: error.message });
+        }
+    };
+
+
+    // Remove a poetry from user's favorites
+    delete_favorite_poem = async (req, res) => {
+        const { poetry_id } = req.params;
+        const userId = req.userId;
+
+        const mongoose = require("mongoose");
+        if (!mongoose.Types.ObjectId.isValid(poetry_id) || !mongoose.Types.ObjectId.isValid(userId)) {
+            return res.status(400).json({ message: "Invalid poetry ID or user ID" });
+        }
+
+        try {
+            const poem = await poetryModel.findById(poetry_id);
+            if (!poem) {
+                return res.status(404).json({ message: "Poetry not found" });
+            }
+
+            const user = await authModel.findById(userId);
+            if (!user) {
+                return res.status(404).json({ message: "User not found" });
+            }
+
+            // Remove poetry_id from favorites array
+            const updatedUser = await authModel.findByIdAndUpdate(
+                userId,
+                { $pull: { favorites: poetry_id } },
+                { new: true }
+            ).populate('favorites'); // Populate full poetry objects after update
+
+            return res.status(200).json({
+                message: "Removed from favorites",
+                favorites: updatedUser.favorites,
+            });
+
+        } catch (error) {
+            console.error("Error deleting favourite poem:", error);
+            return res.status(500).json({ message: "Internal server error", error: error.message });
+        }
+    };
+
+
 
     // Log out User Controller
     user_logout = (req, res) => {
@@ -346,113 +457,5 @@ class authController {
 module.exports = new authController();
 
 
-
-// //google login-signup
-// user_google_login = (req, res, next) => {
-//     passport.authenticate('google', { scope: ['profile', 'email'] })(req, res, next);
-// };
-// user_google_callback = (req, res, next) => {
-//     passport.authenticate('google', { session: false }, async (err, user) => {
-//         if (err) {
-//             console.error("Error during Google callback:", err);
-//             return res.status(500).json({ message: "Internal server error" });
-//         }
-
-//         if (!user) {
-//             console.error("No user found after Google authentication.");
-//             return res.status(401).json({ message: "Authentication failed" });
-//         }
-
-//         try {
-//             let existingUser = await authModel.findOne({ email: user.email });
-
-//             if (!existingUser) {
-//                 existingUser = new authModel({
-//                     fullName: user.displayName || 'No Name',
-//                     email: user.email,
-//                     googleId: user.id,
-//                     password: null, // No password initially
-//                 });
-//                 await existingUser.save();
-//                 console.log("New user created:", existingUser.email);
-//             } else {
-//                 console.log("Existing user login:", existingUser.email);
-//             }
-
-//             // If the user doesn't have a password, prompt them to set one
-//             if (existingUser.password === null) {
-//                 return res.status(200).json({
-//                     success: true,
-//                     message: 'Google login successful! Please set a password for future logins.',
-//                     setPasswordRequired: true, // flag indicating the user needs to set a password
-//                     user: {
-//                         id: existingUser._id,
-//                         fullName: existingUser.fullName,
-//                         email: existingUser.email,
-//                     },
-//                 });
-//             }
-
-//             const token = jwt.sign(
-//                 { userId: existingUser._id },
-//                 process.env.secret,
-//                 { expiresIn: process.env.exp_time }
-//             );
-
-//             return res.status(200).json({
-//                 success: true,
-//                 message: 'Google login successful!',
-//                 token,
-//                 user: {
-//                     id: existingUser._id,
-//                     fullName: existingUser.fullName,
-//                     email: existingUser.email,
-//                 },
-//             });
-
-//         } catch (error) {
-//             console.error("Error during user creation or login:", error);
-//             return res.status(500).json({ message: "Server error while processing Google login" });
-//         }
-//     })(req, res, next);
-// };
-
-// user_set_password = async (req, res) => {
-//     const { email, password } = req.body;
-
-//     if (!email || !password) {
-//         return res.status(400).json({ success: false, message: 'Please provide email and password' });
-//     }
-
-//     try {
-//         const user = await authModel.findOne({ email });
-
-//         if (!user) {
-//             return res.status(404).json({ success: false, message: 'User not found' });
-//         }
-
-//         // Ensure user has no password already set
-//         if (user.password !== null) {
-//             return res.status(400).json({ success: false, message: 'Password is already set for this account' });
-//         }
-
-//         // Hash the new password
-//         const hashedPassword = await bcrypt.hash(password, 10);
-//         user.password = hashedPassword;
-
-//         // Update password and set the updatedAt field
-//         user.updatedAt = Date.now();
-//         await user.save();
-
-//         res.status(200).json({
-//             success: true,
-//             message: 'Password set successfully',
-//         });
-
-//     } catch (error) {
-//         console.error('Set Password Error:', error);
-//         return res.status(500).json({ success: false, message: 'Internal server error' });
-//     }
-// };
 
 

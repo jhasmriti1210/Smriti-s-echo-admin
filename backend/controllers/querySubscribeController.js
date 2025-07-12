@@ -1,5 +1,5 @@
 const nodemailer = require("nodemailer");
-const Subscriber = require("../models/Subscribe");
+const Subscriber = require("../models/subscribe");
 
 // Send welcome email to the new subscriber
 const sendWelcomeEmail = async (subscriberEmail) => {
