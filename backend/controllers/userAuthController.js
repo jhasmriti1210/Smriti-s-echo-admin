@@ -113,7 +113,7 @@ class authController {
                     expiresIn: '1d', // Token expiration time
                 });
 
-                const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+                const frontendUrl = process.env.FRONTEND_URL || 'https://smriti-s-echo-userdashboard-wntk.vercel.app/';
                 const verificationLink = `${frontendUrl}/loginstuff/verify-email?token=${verificationToken}`;
 
                 // Sending confirmation email
