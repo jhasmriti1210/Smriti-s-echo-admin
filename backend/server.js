@@ -15,15 +15,22 @@ const db_connect = require('./utils/db');
 app.use(bodyParser.json());
 
 // CORS Handling
-if (process.env.MODE === 'production') {
-    app.use(cors());
+const corsOptions = {
+    origin: [
+        "https://smriti-s-echo-admin-pq1n.vercel.app",
+        "http://localhost:3000"
+    ],
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+};
+
+if (process.env.NODE_ENV === 'production') {
+    app.use(cors()); // Use wildcard in production
 } else {
-    app.use(cors({
-        origin: ["https://smriti-s-echo-admin-pq1n.vercel.app/", "http://localhost:3000"]
-    }));
+    app.use(cors(corsOptions));
 }
 
-// app.use(passport.initialize());
+
 
 // Routes
 app.use('/', require('./routes/authRoutes'));
