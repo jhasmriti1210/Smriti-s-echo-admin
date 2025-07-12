@@ -42,7 +42,14 @@ app.use('/', require('./routes/userAuthRoutes'));
 app.get('/', (req, res) => res.send('Hello World!'));
 
 // Connect DB
-db_connect();
+// db_connect();
+mongoose
+    .connect(process.env.mode === "production" ? process.env.db_production_url : process.env.db_local_url, {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+    })
+    .then(() => console.log("MongoDB Connected"))
+    .catch((err) => console.error("MongoDB Connection Error:", err));
 
 // Server listening
 const PORT = process.env.PORT || 8082; // default fallback
