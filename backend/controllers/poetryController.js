@@ -19,14 +19,14 @@ class poetryController {
             cloud_name: process.env.cloud_name,
             api_key: process.env.api_key,
             api_secret: process.env.api_secret,
-            secure: true
+            // secure: true
         });
 
         try {
             const [fields, files] = await form.parse(req);
 
             // Upload image
-            const { secure_url: imageUrl } = await cloudinary.uploader.upload(files.image[0].filepath, {
+            const { url: imageUrl } = await cloudinary.uploader.upload(files.image[0].filepath, {
                 folder: 'poetry_images'
             });
 
@@ -37,7 +37,7 @@ class poetryController {
                     folder: 'poetry_audio',
                     resource_type: 'video'  // important for audio files!
                 });
-                audioUrl = audioResult.secure_url;
+                audioUrl = audioResult.url;
             }
 
             const { title, description } = fields;
@@ -89,7 +89,7 @@ class poetryController {
             cloud_name: process.env.cloud_name,
             api_key: process.env.api_key,
             api_secret: process.env.api_secret,
-            secure: true
+            // secure: true
         });
 
         // ✅ Check if poetry_id is valid
@@ -113,7 +113,7 @@ class poetryController {
                     }
 
                     const imageData = await cloudinary.uploader.upload(files.new_image[0].filepath, { folder: 'poetry_images' });
-                    imageUrl = imageData.secure_url;
+                    imageUrl = imageData.url;
                 }
 
                 if (files.new_audio) {
@@ -127,7 +127,7 @@ class poetryController {
                         resource_type: 'video',
                         folder: 'poetry_audio'
                     });
-                    audioUrl = audioData.secure_url;
+                    audioUrl = audioData.url;
                 }
             }
 
@@ -256,7 +256,7 @@ class poetryController {
             cloud_name: process.env.cloud_name,
             api_key: process.env.api_key,
             api_secret: process.env.api_secret,
-            secure: true
+            // secure: true
         })
 
         try {
@@ -265,8 +265,8 @@ class poetryController {
             const { images } = files
 
             for (let i = 0; i < images.length; i++) {
-                const { secure_url } = await cloudinary.uploader.upload(images[i].filepath, { folder: 'poetry_images' })
-                allImages.push({ writerId: id, secure_url })
+                const { url } = await cloudinary.uploader.upload(images[i].filepath, { folder: 'poetry_images' })
+                allImages.push({ writerId: id, url })
             }
 
             const image = await galleryModel.insertMany(allImages)
