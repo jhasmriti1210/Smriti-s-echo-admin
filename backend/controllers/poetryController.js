@@ -19,7 +19,7 @@ class poetryController {
             cloud_name: process.env.cloud_name,
             api_key: process.env.api_key,
             api_secret: process.env.api_secret,
-            // secure: true
+            secure: true
         });
 
         try {
@@ -89,7 +89,7 @@ class poetryController {
             cloud_name: process.env.cloud_name,
             api_key: process.env.api_key,
             api_secret: process.env.api_secret,
-            // secure: true
+            secure: true
         });
 
         // ✅ Check if poetry_id is valid
@@ -256,7 +256,7 @@ class poetryController {
             cloud_name: process.env.cloud_name,
             api_key: process.env.api_key,
             api_secret: process.env.api_secret,
-            // secure: true
+            secure: true
         })
 
         try {
