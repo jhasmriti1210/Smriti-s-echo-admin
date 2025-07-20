@@ -9,8 +9,13 @@ const nodemailer = require("nodemailer");
 require('dotenv').config();
 const poetryModel = require('../models/poetryModel');
 
-
-
+// Configure cloudinary
+cloudinary.config({
+    cloud_name: process.env.cloud_name,
+    api_key: process.env.api_key,
+    api_secret: process.env.api_secret,
+    secure: true
+});
 
 // Multer setup for memory storage
 const storage = multer.memoryStorage();
@@ -77,11 +82,20 @@ class authController {
                 // If profile picture is uploaded, process it
                 if (profilePictureFile) {
                     try {
+                        console.log('Starting profile picture upload...');
+                        console.log('Cloudinary Config:', {
+                            cloudName: process.env.cloud_name ? 'Set' : 'Not Set',
+                            apiKey: process.env.api_key ? 'Set' : 'Not Set',
+                            apiSecret: process.env.api_secret ? 'Set' : 'Not Set'
+                        });
+
                         // Create a buffer from the file
                         const buffer = profilePictureFile.buffer;
+                        console.log('File buffer created, size:', buffer.length, 'mime type:', profilePictureFile.mimetype);
 
                         // Convert buffer to base64
                         const base64String = `data:${profilePictureFile.mimetype};base64,${buffer.toString('base64')}`;
+                        console.log('Successfully converted to base64');
 
                         // Upload directly to Cloudinary using base64
                         const cloudinaryResult = await cloudinary.uploader.upload(base64String, {
@@ -95,11 +109,19 @@ class authController {
                             secure: true,
                         });
 
+                        console.log('Cloudinary upload successful:', cloudinaryResult.secure_url);
                         profilePictureUrl = cloudinaryResult.secure_url; // Get the URL from Cloudinary response
 
                     } catch (uploadError) {
-                        console.error('Cloudinary Upload Error:', uploadError);
-                        return res.status(500).json({ success: false, message: "Failed to upload profile picture" });
+                        console.error('Cloudinary Upload Error Details:', {
+                            error: uploadError.message,
+                            stack: uploadError.stack
+                        });
+                        return res.status(500).json({
+                            success: false,
+                            message: "Failed to upload profile picture. Please try again with a different image or contact support.",
+                            error: uploadError.message
+                        });
                     }
                 }
 
@@ -120,7 +142,7 @@ class authController {
                     expiresIn: '1d', // Token expiration time
                 });
 
-                const frontendUrl = process.env.FRONTEND_URL || 'https://smriti-s-echo-userdashboard-wntk.vercel.app/';
+                const frontendUrl = process.env.FRONTEND_URL || 'https://smriti-jha-userdashboard.onrender.com';
                 const verificationLink = `${frontendUrl}/loginstuff/verify-email?token=${verificationToken}`;
 
                 // Sending confirmation email
