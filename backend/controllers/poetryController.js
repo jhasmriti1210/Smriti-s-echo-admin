@@ -26,8 +26,9 @@ class poetryController {
             const [fields, files] = await form.parse(req);
 
             // Upload image
-            const { url: imageUrl } = await cloudinary.uploader.upload(files.image[0].filepath, {
-                folder: 'poetry_images'
+            const { secure_url: imageUrl } = await cloudinary.uploader.upload(files.image[0].filepath, {
+                folder: 'poetry_images',
+                secure: true
             });
 
             // Upload audio (if exists)
@@ -35,9 +36,10 @@ class poetryController {
             if (files.audio && files.audio.length > 0) {
                 const audioResult = await cloudinary.uploader.upload(files.audio[0].filepath, {
                     folder: 'poetry_audio',
-                    resource_type: 'video'  // important for audio files!
+                    resource_type: 'video',  // important for audio files!
+                    secure: true
                 });
-                audioUrl = audioResult.url;
+                audioUrl = audioResult.secure_url;
             }
 
             const { title, description } = fields;
@@ -112,8 +114,11 @@ class poetryController {
                         await cloudinary.uploader.destroy(imageFile);
                     }
 
-                    const imageData = await cloudinary.uploader.upload(files.new_image[0].filepath, { folder: 'poetry_images' });
-                    imageUrl = imageData.url;
+                    const imageData = await cloudinary.uploader.upload(files.new_image[0].filepath, {
+                        folder: 'poetry_images',
+                        secure: true
+                    });
+                    imageUrl = imageData.secure_url;
                 }
 
                 if (files.new_audio) {
@@ -125,9 +130,10 @@ class poetryController {
 
                     const audioData = await cloudinary.uploader.upload(files.new_audio[0].filepath, {
                         resource_type: 'video',
-                        folder: 'poetry_audio'
+                        folder: 'poetry_audio',
+                        secure: true
                     });
-                    audioUrl = audioData.url;
+                    audioUrl = audioData.secure_url;
                 }
             }
 
@@ -265,8 +271,11 @@ class poetryController {
             const { images } = files
 
             for (let i = 0; i < images.length; i++) {
-                const { url } = await cloudinary.uploader.upload(images[i].filepath, { folder: 'poetry_images' })
-                allImages.push({ writerId: id, url })
+                const { secure_url } = await cloudinary.uploader.upload(images[i].filepath, {
+                    folder: 'poetry_images',
+                    secure: true
+                })
+                allImages.push({ writerId: id, url: secure_url })
             }
 
             const image = await galleryModel.insertMany(allImages)
