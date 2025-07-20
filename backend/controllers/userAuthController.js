@@ -12,18 +12,23 @@ const poetryModel = require('../models/poetryModel');
 
 
 
-// Multer setup for local file storage
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, './uploads');
+// Multer setup for memory storage
+const storage = multer.memoryStorage();
+
+const upload = multer({
+    storage: storage,
+    limits: {
+        fileSize: 5 * 1024 * 1024, // 5MB limit
     },
-    filename: (req, file, cb) => {
-        const uniqueSuffix = Date.now() + path.extname(file.originalname);
-        cb(null, file.fieldname + '-' + uniqueSuffix);
+    fileFilter: (req, file, cb) => {
+        // Check file type
+        if (file.mimetype.startsWith('image/')) {
+            cb(null, true);
+        } else {
+            cb(new Error('Only image files are allowed!'));
+        }
     }
 });
-
-const upload = multer({ storage: storage });
 
 // Nodemailer setup
 const transporter = nodemailer.createTransport({
@@ -71,11 +76,15 @@ class authController {
 
                 // If profile picture is uploaded, process it
                 if (profilePictureFile) {
-                    const localPath = `./uploads/${profilePictureFile.filename}`;
-
-                    // Upload to Cloudinary after saving locally
                     try {
-                        const cloudinaryResult = await cloudinary.uploader.upload(localPath, {
+                        // Create a buffer from the file
+                        const buffer = profilePictureFile.buffer;
+
+                        // Convert buffer to base64
+                        const base64String = `data:${profilePictureFile.mimetype};base64,${buffer.toString('base64')}`;
+
+                        // Upload directly to Cloudinary using base64
+                        const cloudinaryResult = await cloudinary.uploader.upload(base64String, {
                             folder: "user_profiles",
                             public_id: `${Date.now()}_${fullName.replace(/\s+/g, '_')}`,
                             resource_type: "image",
@@ -84,13 +93,9 @@ class authController {
                             crop: "fill",
                             quality: "auto:good",
                             secure: true,
-
                         });
 
                         profilePictureUrl = cloudinaryResult.secure_url; // Get the URL from Cloudinary response
-
-                        // Delete the local file after uploading to Cloudinary
-                        fs.unlinkSync(localPath);
 
                     } catch (uploadError) {
                         console.error('Cloudinary Upload Error:', uploadError);
@@ -300,9 +305,11 @@ class authController {
 
                 // Upload new profile picture
                 if (req.file) {
-                    const localPath = `./uploads/${req.file.filename}`;
                     try {
-                        const uploadResult = await cloudinary.uploader.upload(localPath, {
+                        // Convert buffer to base64
+                        const base64String = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
+
+                        const uploadResult = await cloudinary.uploader.upload(base64String, {
                             folder: "user_profiles",
                             secure: true,
                             width: 300,
@@ -312,7 +319,6 @@ class authController {
                         });
 
                         user.profilePicture = uploadResult.secure_url;
-                        fs.unlinkSync(localPath);
                     } catch (uploadError) {
                         console.error("Cloudinary Upload Error:", uploadError);
                         return res.status(500).json({ success: false, message: "Failed to upload profile picture" });
