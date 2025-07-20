@@ -19,6 +19,7 @@ app.use(bodyParser.json());
 const corsOptions = {
     origin: [
         "https://smriti-s-echo-admin-pq1n.vercel.app",
+        "https://smriti-s-echo-userdashboard.vercel.app",
         "http://localhost:3000"
     ],
     credentials: true,
