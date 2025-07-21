@@ -19,7 +19,7 @@ app.use(bodyParser.json());
 const corsOptions = {
     origin: [
         "https://smriti-s-echo-admin-pq1n.vercel.app",
-        "https://smriti-s-echo-userdashboard.vercel.app",
+        "https://smriti-jha-userdashboard.onrender.com",
         "http://localhost:3000"
     ],
     credentials: true,
@@ -32,7 +32,10 @@ if (process.env.NODE_ENV === 'production') {
     app.use(cors(corsOptions));
 }
 
-
+// Health check route
+app.get('/health', (req, res) => {
+    res.status(200).json({ status: 'OK', uptime: process.uptime() });
+});
 
 // Routes
 app.use('/', require('./routes/authRoutes'));
