@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "disposable-email-domains": "^1.0.62"
+  }
+}

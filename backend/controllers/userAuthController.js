@@ -8,6 +8,7 @@ const fs = require('fs');
 const nodemailer = require("nodemailer");
 require('dotenv').config();
 const poetryModel = require('../models/poetryModel');
+const disposable = require('disposable-email-domains');
 
 // Configure cloudinary
 cloudinary.config({
@@ -69,6 +70,12 @@ class authController {
                 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
                 if (!emailRegex.test(email)) {
                     return res.status(400).json({ success: false, message: 'Invalid email format' });
+                }
+
+                //  Block temp email domains
+                const emailDomain = email.split("@")[1];
+                if (disposable.includes(emailDomain)) {
+                    return res.status(400).json({ success: false, message: 'Temporary or disposable email addresses are not allowed.' });
                 }
 
                 // Check if the user already exists
