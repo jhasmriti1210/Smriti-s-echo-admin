@@ -17,19 +17,33 @@ const sendNewContentToSubscribers = async ({ title, description, image, slug }) 
             const mailOptions = {
                 from: `"Smriti's Echoes" <${process.env.MY_EMAIL}>`,
                 to: sub.email,
-                subject: `📜 New Poetry: ${title}`,
+                subject: `New Poetry Release: "${title}" by Smriti`,
                 html: `
-                    <h2>${title}</h2>
-                    <p>${description.slice(0, 100)}...</p>
-                    <img src="${image}" alt="Poetry image" style="max-width:100%;border-radius:8px;" />
-                    <p>
-                        <a href="${process.env.FRONTEND_URL}/poetry/${slug}" style="padding:10px 16px;background:#6D28D9;color:#fff;text-decoration:none;border-radius:4px;">
-                            Read Now
-                        </a>
-                    </p>
-                    <hr />
-                    <p style="font-size: 0.8em; color: gray;">You're receiving this because you subscribed to Smriti's Echoes.</p>
-                `,
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; background: #f9f9f9; color: #333;">
+            <header style="text-align: center; padding-bottom: 20px;">
+                <h1 style="color: #6D28D9; font-size: 24px; margin: 0;">Smriti's Echoes</h1>
+                <p style="font-size: 14px; margin: 5px 0;">Giving words to every emotion, every story.</p>
+            </header>
+
+            <section style="background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.05);">
+                <h2 style="color: #333; font-size: 22px;">${title}</h2>
+                <p style="font-size: 16px; line-height: 1.6;">${description.slice(0, 100)}...</p>
+                <div style="text-align: center; margin-top: 25px;">
+                    <a href="${process.env.FRONTEND_URL}/poetry/${slug}" 
+                       style="display: inline-block; padding: 12px 24px; background-color: #6D28D9; color: #fff; 
+                              text-decoration: none; border-radius: 4px; font-weight: bold;">
+                        Read the Full Poem
+                    </a>
+                </div>
+            </section>
+
+            <footer style="margin-top: 30px; font-size: 12px; color: #777; text-align: center;">
+                <p>Poem by <strong>Smriti</strong> • Published on ${new Date().toLocaleDateString()}</p>
+                <p>You are receiving this email because you subscribed to <em>Smriti's Echoes</em>.</p>
+                
+            </footer>
+        </div>
+    `,
             };
 
             await transporter.sendMail(mailOptions);
