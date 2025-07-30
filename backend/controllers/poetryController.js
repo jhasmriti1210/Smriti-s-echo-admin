@@ -71,22 +71,9 @@ class poetryController {
                 date: moment().format('LL'),
                 writerName,
                 image: imageUrl,
-                audio: audioUrl
+                audio: audioUrl,
+                status: 'pending'  // Set initial status to pending
             });
-
-            // Send email notifications to subscribers
-            try {
-                await sendNewContentToSubscribers({
-                    title: poetry.title,
-                    description: poetry.description,
-                    image: poetry.image,
-                    slug: poetry.slug
-                });
-                console.log('Subscriber notifications sent successfully');
-            } catch (emailError) {
-                console.error('Error sending subscriber notifications:', emailError);
-                // Don't return error here, as the poetry was still successfully added
-            }
 
             return res.status(201).json({ message: 'Poetry added successfully', poetry });
         } catch (error) {
@@ -182,27 +169,37 @@ class poetryController {
         const { poetry_id } = req.params;
         const { status } = req.body;
 
-
         if (role === 'admin') {
             try {
-
                 const poetry = await poetryModel.findByIdAndUpdate(poetry_id, { status }, { new: true });
-
 
                 if (!poetry) {
                     return res.status(404).json({ message: 'Poetry item not found' });
                 }
 
+                // Send email notifications to subscribers only when status is changed to 'active'
+                if (status === 'active') {
+                    try {
+                        await sendNewContentToSubscribers({
+                            title: poetry.title,
+                            description: poetry.description,
+                            image: poetry.image,
+                            slug: poetry.slug
+                        });
+                        console.log('Subscriber notifications sent successfully for newly activated poetry');
+                    } catch (emailError) {
+                        console.error('Error sending subscriber notifications:', emailError);
+                        // Don't return error here, as the status update was still successful
+                    }
+                }
 
                 return res.status(200).json({ message: 'Poetry status updated successfully', poetry });
 
             } catch (error) {
-
                 console.error(error);
                 return res.status(500).json({ message: 'An error occurred while updating the poetry status' });
             }
         } else {
-
             return res.status(401).json({ message: 'You are not authorized to update the poetry status' });
         }
     };
