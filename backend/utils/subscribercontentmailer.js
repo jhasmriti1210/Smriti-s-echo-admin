@@ -35,16 +35,20 @@ const sendNewContentToSubscribers = async ({ title, description, image, slug }) 
                         Read the Full Poem
                     </a>
                 </div>
+                <p style="font-size: 14px; color: #555; margin-top: 25px; text-align: center;">
+                    If this poem resonates with you, take a moment to <strong>rate it</strong> and leave a <strong>comment</strong>. 
+                    Your feedback means the world and helps keep the words flowing.
+                </p>
             </section>
 
             <footer style="margin-top: 30px; font-size: 12px; color: #777; text-align: center;">
                 <p>Poem by <strong>Smriti</strong> • Published on ${new Date().toLocaleDateString()}</p>
                 <p>You are receiving this email because you subscribed to <em>Smriti's Echoes</em>.</p>
-                
             </footer>
         </div>
     `,
             };
+
 
             await transporter.sendMail(mailOptions);
         }
