@@ -1,5 +1,5 @@
 const nodemailer = require("nodemailer");
-const Subscriber = require("../models/Subscribe");
+const Subscriber = require("../models/subscribe");
 
 const sendNewContentToSubscribers = async ({ title, description, image, slug }) => {
     try {
