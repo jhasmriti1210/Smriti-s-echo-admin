@@ -15,6 +15,9 @@ router.post('/api/images/add', middleware.auth, poetryController.add_images);
 router.get('/api/poetry', middleware.auth, poetryController.get_dashboard_poetry);
 router.get('/api/poetry/:poetry_id', middleware.auth, poetryController.get_dashboard_single_poetry);
 
+// Like/Unlike poetry
+router.post('/api/poetry/like/:poetry_id', usermiddleware.auth, poetryController.toggle_like_poetry);
+
 // website
 router.get('/api/all/poetry', poetryController.get_all_poetry);
 router.get('/api/popular/poetry', poetryController.get_popular_poetry);

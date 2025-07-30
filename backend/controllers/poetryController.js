@@ -636,6 +636,46 @@ class poetryController {
     };
 
 
+    toggle_like_poetry = async (req, res) => {
+        const { poetry_id } = req.params;
+        const userId = req.userId; // From auth middleware
+
+        try {
+            if (!mongoose.Types.ObjectId.isValid(poetry_id)) {
+                return res.status(400).json({ message: 'Invalid poetry ID format' });
+            }
+
+            const poetry = await poetryModel.findById(poetry_id);
+            if (!poetry) {
+                return res.status(404).json({ message: 'Poetry not found' });
+            }
+
+            // Check if user has already liked the poetry
+            const existingLike = poetry.likes.find(like => like.userId.toString() === userId);
+
+            if (existingLike) {
+                // Unlike: Remove the like
+                poetry.likes = poetry.likes.filter(like => like.userId.toString() !== userId);
+                poetry.likesCount = poetry.likesCount - 1;
+            } else {
+                // Like: Add new like
+                poetry.likes.push({ userId });
+                poetry.likesCount = poetry.likesCount + 1;
+            }
+
+            await poetry.save();
+
+            return res.status(200).json({
+                message: existingLike ? 'Poetry unliked' : 'Poetry liked',
+                likesCount: poetry.likesCount,
+                isLiked: !existingLike
+            });
+        } catch (error) {
+            console.error('Error toggling like:', error);
+            return res.status(500).json({ message: 'Internal server error' });
+        }
+    };
+
     delete_poetry = async (req, res) => {
         const { poetry_id } = req.params;
 

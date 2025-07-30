@@ -46,6 +46,20 @@ const poetrySchema = new Schema({
         type: String,
         default: 'pending'
     },
+    likes: [{
+        userId: {
+            type: Schema.Types.ObjectId,
+            ref: 'users'
+        },
+        createdAt: {
+            type: Date,
+            default: Date.now
+        }
+    }],
+    likesCount: {
+        type: Number,
+        default: 0
+    },
     count: {
         type: Number,
         default: 0
