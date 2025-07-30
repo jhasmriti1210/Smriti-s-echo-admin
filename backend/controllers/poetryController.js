@@ -7,6 +7,7 @@ const { mongo: { ObjectId } } = require('mongoose')
 const moment = require('moment')
 const axios = require('axios');
 const mongoose = require('mongoose')
+const { sendNewContentToSubscribers } = require('../utils/subscribercontentmailer');
 
 
 
@@ -71,6 +72,20 @@ class poetryController {
                 image: imageUrl,
                 audio: audioUrl
             });
+
+            // Send email notifications to subscribers
+            try {
+                await sendNewContentToSubscribers({
+                    title: poetry.title,
+                    description: poetry.description,
+                    image: poetry.image,
+                    slug: poetry.slug
+                });
+                console.log('Subscriber notifications sent successfully');
+            } catch (emailError) {
+                console.error('Error sending subscriber notifications:', emailError);
+                // Don't return error here, as the poetry was still successfully added
+            }
 
             return res.status(201).json({ message: 'Poetry added successfully', poetry });
         } catch (error) {

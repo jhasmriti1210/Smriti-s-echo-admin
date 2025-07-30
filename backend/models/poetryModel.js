@@ -70,7 +70,19 @@ const poetrySchema = new Schema({
     isFeatured: {
         type: Boolean,
         default: false
-    }
+    },
+
+    // likes: {
+    //     type: Number,
+    //     default: 0
+    // },
+    // // NEW: track which users have liked
+    // likedUsers: [
+    //     {
+    //         type: Schema.Types.ObjectId,
+    //         ref: 'authModel'
+    //     }
+    // ]
 }, { timestamps: true });
 
 poetrySchema.index({
